@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sensory QR Code Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <style>
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .load {
+            width: 100px;
+            height: 100px;
+            margin: 20px auto;
+            border: solid 10px #b42818;
+            border-radius: 50%;
+            border-right-color: transparent;
+            border-bottom-color: transparent;
+            animation: rotate 1s linear infinite;
+        }
+
+        #loading {
+            display: none;
+        }
+
+        #qrcode canvas {
+            margin: 20px auto;
+        }
+    </style>
+
+    <script>
+        function generateQRCode() {
+            const url = $('#urlInput').val();
+            const loadingDiv = $('#loading');
+            const qrCodeDiv = $('#qrcode');
+            const inputSection = $('#inputSection');
+            const actionsDiv = $('#actions');
+
+            if (!url) {
+                alert("Please enter a URL");
+                return;
+            }
+
+            loadingDiv.show();
+            qrCodeDiv.hide();
+
+            setTimeout(() => {
+                loadingDiv.hide();
+                qrCodeDiv.show();
+
+                qrCodeDiv.empty();
+                const canvas = document.createElement('canvas');
+                qrCodeDiv.append(canvas);
+                QRCode.toCanvas(canvas, url, { width: 256, height: 256 }, function (error) {
+                    if (error) console.error(error);
+                });
+
+                inputSection.hide();
+                actionsDiv.removeClass('hidden');
+            }, 2000);
+        }
+
+        function downloadWebpageAsImage() {
+            html2canvas(document.querySelector("#main-content")).then(canvas => {
+                const link = document.createElement('a');
+                link.href = canvas.toDataURL('image/png');
+                link.download = 'QRCODE.png';
+                link.click();
+            });
+        }
+
+        $(document).ready(function () {
+            $('#generateBtn').on('click', generateQRCode);
+            $('#downloadBtn').on('click', downloadWebpageAsImage);
+            $('#backBtn').on('click', function () {
+                location.reload();
+            });
+        });
+    </script>
+    
+</head>
+
+<body class="bg-gray-200">
+
+    <!-- Navbar -->
+    <nav class="bg-black p-4 flex justify-between items-center">
+        <img src="tolaram.png" alt="Placeholder Image" class="w-40 h-10">
+        <span class="text-white text-xl mx-auto font-semibold">QRCODE GENERATOR </span>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="flex justify-center items-center mt-8">
+        <div id="main-content" class="bg-slate-300 p-8 rounded shadow-md w-96">
+            <div id="inputSection">
+                <input id="urlInput" type="text" placeholder="Enter link" class="w-full p-2 mb-4 border rounded">
+                <button id="generateBtn" class="w-full bg-blue-500 text-white p-2 rounded">Generate</button>
+            </div>
+            <div id="loading" class="load"></div>
+            <div id="qrcode"></div>
+            <div id="actions" class="hidden mt-4">
+                <button id="downloadBtn" class="w-full bg-green-500 text-white p-2 rounded mb-2">Download</button>
+                <button id="backBtn" class="w-full bg-gray-500 text-white p-2 rounded">Back</button>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>
